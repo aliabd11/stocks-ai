@@ -1,0 +1,30 @@
+Goal:
+Design a CSP that takes as input mutual fund symbols and various attributes of each fund and that constructs configurations of mutual funds (or stocks) as investment portfolios for people. A program that will search through funds in order to create a portfolio that matches a given user's investment goals. For example, some investors want income generation, while others are interested in growth. Some are conservative while others are comfortable with some risk. Some want to avoid high mutual fund management fees. Some wish to have a percentage of their portfolio invested in ethical or green funds. Others maywish to avoid certain sectors of the market. Encode goals as constraints (i.e. constraints on fund types, pricing agents, et cetera). Evaluate the performance of a variety of CSP based approaches relative to blind or simple depth-first search for building portfolios.
+
+
+Task breakdown:
+- Find data containing mutual fund symbols as well as categories corresponding to different types of mutual funds (style box)
+- Parse csv/JSON/etc data and figure out how to link it with CSP Python base code.
+  - If cannot find *all* required data  (i.e stocks that are "green", come up with plan to simulate data)
+
+- Consider different contraints such as
+  - Beliefs: Investors who only want companies that meet criteria of certain beliefs (ethical funds)
+  - Region: Investors who want funds from certain regions (regional funds)
+  - Sector: Investors who want specialized investments in certain areas (tech, health, ...) (sector funds)
+  - Desired flavour:
+    - Stocks (Equity funds)
+    - Bonds (Fixed income funds)
+    - Balanced Funds (Stocks and Bonds)
+  - Desired style (as per Style Box)
+    - Large/Mid/Small X Value/Blend/Growth
+  - Avoid high management fees/Okay with high management fees
+
+- Understand how a professional investment portfolio is structured, layout, data given to end user, etc.
+- Think about optimization built on top of the CSP to distinguish better from worse portfolios if many match a users constraints.
+- Consider different ordering heuristics
+
+- //Success metrics//
+  - Reaching a solution within a certain time bound (GAC vs FC under 5 seconds)
+  - Control test cases, providing same tests to each algorithm
+    - Scaling size and measuring performance (constraints over 50 stocks in a portfolio vs constraints over 20 stocks, binary vs. n-ary constraints)
+      - Deciding on which ordering heursitics perform better, number of nodes expanded
