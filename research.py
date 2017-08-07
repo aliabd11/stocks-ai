@@ -65,7 +65,7 @@ def parse_as_dictionary(file_name):
   for row in reader:
       key = row[0]
       result[key] = row[1:]
-  print result
+  print(result)
 
 def generate_styles(rows):
   #mutual funds style box #http://www.investopedia.com/articles/basics/06/stylebox.asp
@@ -103,7 +103,14 @@ def create_mutual_fund_output(file_name):
 
   return
 
-'''To use uncomment and run the right method below''' 
-#create_stocks_output('exchange.csv') #create output file with desired additional columns
-#parse_as_dictionary('output.csv') #convert csv file into dictionary with first entry as key
-#create_mutual_fund_output('mutualfunds.csv') #create output file (for mutual funds) with desired additional columns
+'''To use uncomment and run the right method below''' # pls dont do dis
+if __name__ == '__main__':
+    print(
+'''Welcome to research.py!
+This program will perform some research on your data to figure out more information
+about those companies.
+Enter you file name to process: ''')
+    # ask for input file name and processs it
+# create_stocks_output('exchange.csv') #create output file with desired additional columns
+# parse_as_dictionary('output.csv') #convert csv file into dictionary with first entry as key
+# create_mutual_fund_output('mutualfunds.csv') #create output file (for mutual funds) with desired additional columns
