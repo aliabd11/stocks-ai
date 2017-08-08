@@ -1,9 +1,9 @@
 import csv
 import itertools
 import random
+import math
 
 def generate_region_list(rows):
-  print("generating random")
   i = 0
   region_list = ['Canada', 'United States', 'Mexico']
   csv_region_list = []
@@ -13,9 +13,8 @@ def generate_region_list(rows):
   return csv_region_list
 
 def generate_percentage_true(rows, percent): # ex. percent = 0.30, 30% green stocks
-
-  green_rows = [True] * int((rows * percent))
-  other_rows = [False] * int((rows * (1 - percent)))
+  green_rows = [True] * int(math.ceil((rows * percent)))
+  other_rows = [False] * int(math.ceil((rows * (1 - percent))))
 
   green_list = green_rows + other_rows
   random.shuffle(green_list)
@@ -30,6 +29,11 @@ def generate_industry_sectors(rows, percent):
     i += 1
   return csv_sectors
 
+def check_row_count(file_name):
+  reader = csv.reader(open(file_name))
+  row_count = sum(1 for row in reader)
+  return row_count
+
 def create_stocks_output(file_name):
   with open(file_name) as csvinput, open('output.csv', 'w') as csvoutput:
     writer = csv.writer(csvoutput, lineterminator='\n')
@@ -42,10 +46,11 @@ def create_stocks_output(file_name):
     headers.append('Industry List')
     writer.writerow(headers)
 
+    row_count = check_row_count(file_name)
 
-    region_list = generate_region_list(3075) #input: number of rows in csv file
-    green_list = generate_percentage_true(3080, 0.10) #casting as int so increase value to avod rounding errors
-    industry_list = generate_industry_sectors(3075, 0.30)
+    region_list = generate_region_list(row_count) #input: number of rows in csv file
+    green_list = generate_percentage_true(row_count, 0.10) #pick desired percentage
+    industry_list = generate_industry_sectors(row_count, 0.30)
 
     index = 0
     for row in reader:
@@ -90,9 +95,11 @@ def create_mutual_fund_output(file_name):
     headers.append('High Management Fees') #True for High Fees, False For No
     writer.writerow(headers)
 
+    row_count = check_row_count(file_name)
 
-    style_list = generate_styles(3075) #input: number of rows in csv file
-    fees_list = generate_percentage_true(3080, 0.10)
+
+    style_list = generate_styles(row_count) #input: number of rows in csv file
+    fees_list = generate_percentage_true(row_count, 0.10)
 
     index = 0
     for row in reader:
@@ -103,14 +110,18 @@ def create_mutual_fund_output(file_name):
 
   return
 
-'''To use uncomment and run the right method below''' # pls dont do dis
 if __name__ == '__main__':
-    print(
-'''Welcome to research.py!
-This program will perform some research on your data to figure out more information
-about those companies.
-Enter you file name to process: ''')
-    # ask for input file name and processs it
-# create_stocks_output('exchange.csv') #create output file with desired additional columns
-# parse_as_dictionary('output.csv') #convert csv file into dictionary with first entry as key
-# create_mutual_fund_output('mutualfunds.csv') #create output file (for mutual funds) with desired additional columns
+    desired_function = raw_input('Enter your desired process (s to create stocks output, d to parse as dictionary, m to create mutual fund output): ')
+
+    options = ["s", "d", "m"]
+    while desired_function not in options:
+      desired_function = raw_input("Choose one of [%s]:" % ", ".join(options))
+
+    file_name = raw_input('Enter a file name to process: ')
+
+    if (desired_function == 's'):
+      create_stocks_output(file_name) # create output file with desired additional columns
+    elif (desired_function == 'd'):
+      parse_as_dictionary(file_name) # convert csv file into dictionary with first entry as key
+    elif (desired_function == 'm'):
+      create_mutual_fund_output(file_name) # create output file (for mutual funds) with desired additional columns
