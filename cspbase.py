@@ -222,7 +222,7 @@ class Constraint:
         self.scope = list(scope)
         self.name = name
         self.sat_tuples = dict()
-        self.max_spending_limit = None
+
         #The next object data item 'sup_tuples' will be used to help
         #support GAC propgation. It allows access to a list of
         #satisfying tuples that contain a particular variable/value
@@ -254,24 +254,8 @@ class Constraint:
            constraints "satisfies" function.  Note the list of values
            are must be ordered in the same order as the list of
            variables in the constraints scope'''
-        if self.name == "max_spending_limit_constraint":
-            return sum(val.price for val in vals) < self.max # check total price
-
         return tuple(vals) in self.sat_tuples
 
-    def has_support(self, var, val):
-        '''Test if a variable value pair has a supporting tuple (a set
-           of assignments satisfying the constraint where each value is
-           still in the corresponding variables current domain
-        '''
-        if self.name == "max_spending_limit_constraint":
-            return val.price < self.max
-
-        if (var, val) in self.sup_tuples:
-            for t in self.sup_tuples[(var, val)]:
-                if self.tuple_is_valid(t):
-                    return True
-        return False
     def get_n_unasgn(self):
         '''return the number of unassigned variables in the constraint's scope'''
         n = 0
@@ -289,6 +273,17 @@ class Constraint:
                 vs.append(v)
         return vs
 
+    def has_support(self, var, val):
+        '''Test if a variable value pair has a supporting tuple (a set
+           of assignments satisfying the constraint where each value is
+           still in the corresponding variables current domain
+        '''
+        if (var, val) in self.sup_tuples:
+            for t in self.sup_tuples[(var, val)]:
+                if self.tuple_is_valid(t):
+                    return True
+        return False
+
     def tuple_is_valid(self, t):
         '''Internal routine. Check if every value in tuple is still in
            corresponding variable domains'''
@@ -298,7 +293,7 @@ class Constraint:
         return True
 
     def __str__(self):
-        return("{}({})".format(self.name,[var.name for var in self.scope]))
+        return("name: {} scope:({}) sat_tuples:{}".format(self.name,[var.name for var in self.scope], self.sat_tuples))
 
 class CSP:
     '''Class for packing up a set of variables into a CSP problem.

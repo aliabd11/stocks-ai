@@ -1,6 +1,6 @@
 import csv
 from cspbase import *
-
+from propagators import *
 '''
 Construct and return Mutual Funds CSP model.
 '''
@@ -15,17 +15,22 @@ def generate_vars(n):
 
     for row in reader:
         tickers.append(row['TICKER'])
+    #print("tickers: ", tickers)
     for i in range(n):
         var = Variable("stock_"+str(i), tickers)
         vars_.append(var)
     return vars_
 
 def green_constraint():
-    con = Constraint("green_constraint", vars_)
-    sat_tuples = get_satisfying_tickers("GREEN","True")
-    print(sat_tuples)
-    con.add_satisfying_tuples(sat_tuples)
-    return con
+    g_cons = []
+    for var in vars_:
+        con = Constraint("green_constraint", [var])
+        print("con scope: ", con.scope)
+        sat_tuples = get_satisfying_tickers("GREEN","True")
+        print("sat_tuples: ", sat_tuples)
+        con.add_satisfying_tuples(sat_tuples)
+        g_cons.append(con)
+    return g_cons
 
 def max_spending_limit_constraint():
     con = Constraint("max_spending_limit", vars_)
@@ -70,9 +75,8 @@ def mutual_funds_csp_model(user_dict):
   volume = user_dict['volume_to_buy']
   generate_vars(volume)
   stocks_csp = CSP('StocksCSP', vars_)
-  constraints = [green_constraint()]#add_industry_constraints(), min_stock_price_constraint(), max_stock_price_constraint(), ]
-  print(constraints)
-  [stocks_csp.add_constraint(c) for c in constraints]
+  g_cons = green_constraint()
+  [stocks_csp.add_constraint(c) for c in g_cons]
   # actual csp model here
   return stocks_csp, [vars_]
 
@@ -82,14 +86,14 @@ def print_kenken_soln(var_array):
         print([var.get_assigned_value() for var in row])
 
 def get_satisfying_tickers(field ,acceptable_value):
-    sat_tuples = tuple()
+    sat_tuples = []
     with open(fname) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             # print(row)
             # print(row['TICKER'], acceptable_value)
             if (row[field] == acceptable_value):
-                sat_tuples+= ((row['TICKER'],),)
+                sat_tuples.append((row['TICKER'],))
     return sat_tuples
 
 if __name__ == '__main__':
@@ -100,6 +104,7 @@ if __name__ == '__main__':
 
     csp, var_array = mutual_funds_csp_model(user_dict)
     solver = BT(csp)
+    solver.TRACE = True
     solver.bt_search(prop_GAC)
     print("Solution")
     print_kenken_soln(var_array)
