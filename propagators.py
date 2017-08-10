@@ -1,6 +1,4 @@
 from collections import deque
-#Look for #IMPLEMENT tags in this file. These tags indicate what has
-#to be implemented to complete problem solution.
 
 '''This file will contain different constraint propagators to be used within
 	bt_search.
@@ -81,32 +79,31 @@ def prop_FC(csp, newVar=None):
 	'''Do forward checking. That is check constraints with
 	only one uninstantiated variable. Remember to keep
 	track of all pruned variable,value pairs and return '''
-	#IMPLEMENT
-	if newVar:
-		cons = csp.get_cons_with_var(newVar)
-	else:
-		cons = csp.get_all_cons()
-	pruned  = []
-	for c in cons:
-		if (c.get_n_unasgn() == 1 ):
-			v = c.get_unasgn_vars()[0]
-			assignments = [var.get_assigned_value() for var in c.get_scope()]
-			for d in v.cur_domain():
-				ind_none = assignments.index(None)
-				assignments[ind_none] = d
-				if not c.check(assignments):
-					v.prune_value(d)
-					pruned.append((v,d),)
-					if v.cur_domain_size() == 0: # DWO
-						return False, pruned
-				assignments[ind_none] = None # restore assignments
-	return True, pruned
+
+  if not newVar:
+      constraints = csp.get_all_cons()
+  else:
+      constraints = csp.get_cons_with_var(newVar)
+
+  pruned = []
+
+  for con in constraints:
+      if con.get_n_unasgn() == 1:
+          # forward check all constraints with V that have one unassigned variable left
+          scope_vars = con.get_scope()
+          for var in scope_vars:
+              for val in var.cur_domain():
+                  if not con.has_support(var, val):
+                      pruned.append((var, val))
+                      var.prune_value(val)  # remove from CurDom
+              if var.cur_domain_size() == 0:
+                  return False, pruned  # Domain Wipe Out
+  return True, pruned
 
 def prop_GAC(csp, newVar=None):
 	'''Do GAC propagation. If newVar is None we do initial GAC enforce
 		processing all constraints. Otherwise we do GAC enforce with
 		constraints containing newVar on GAC Queue'''
-		#IMPLEMENT
 	if newVar:
 		cons = csp.get_cons_with_var(newVar)
 	else:
