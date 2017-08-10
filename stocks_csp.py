@@ -85,16 +85,16 @@ def print_kenken_soln(var_array):
     for row in var_array:
         print([var.get_assigned_value() for var in row])
 
-def get_satisfying_tickers(field ,acceptable_value):
-    sat_tuples = []
-    with open(fname) as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            # print(row)
-            # print(row['TICKER'], acceptable_value)
-            if (row[field] == acceptable_value):
-                sat_tuples.append((row['TICKER'],))
-    return sat_tuples
+def get_satisfying_tickers(field ,acceptable_value, calculated = {}):
+    if (field, acceptable_value) not in calculated:
+        sat_tuples = []
+        with open(fname) as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                if (row[field] == acceptable_value):
+                    sat_tuples.append((row['TICKER'],))
+        calculated[(field, acceptable_value)] = sat_tuples
+    return calculated[(field, acceptable_value)]
 
 if __name__ == '__main__':
     user_dict = {'volume_to_buy': 200, 'green': 1, 'industry': 'Technology',
@@ -104,7 +104,6 @@ if __name__ == '__main__':
 
     csp, var_array = mutual_funds_csp_model(user_dict)
     solver = BT(csp)
-    solver.TRACE = True
     solver.bt_search(prop_GAC)
     print("Solution")
     print_kenken_soln(var_array)
