@@ -9,6 +9,8 @@ Construct and return Mutual Funds CSP model.
 # generate satisfying tuples based on said constraints
 # csp_data {'TICKER': {'price': int, 'price_open': float, 'price_close': float},
 #  'max_spending_limit': int, 'max_stock_price', int, 'min_stock_price': int, 'green_stocks': set(), 'tech_stocks', set()}
+
+
 def generate_vars(n):
     tickers = []
     reader = csv.DictReader(open(fname))
@@ -21,12 +23,13 @@ def generate_vars(n):
         vars_.append(var)
     return vars_
 
+
 def green_constraint():
     g_cons = []
     for var in vars_:
         con = Constraint("green_constraint", [var])
-        print("con scope: ", con.scope)
-        sat_tuples = get_satisfying_tickers("GREEN","True")
+        #print("con scope: ", con.scope)
+        sat_tuples = get_satisfying_tickers("GREEN", "True")
         print("sat_tuples: ", sat_tuples)
         con.add_satisfying_tuples(sat_tuples)
         g_cons.append(con)
@@ -56,17 +59,24 @@ def min_stock_price_constraint():
             con.add_satisfying_tuples(row['TICKER'])
     return con
 
-def add_industry_constraints():
-    reader = csv.DictReader(fname)
-    con = Constraint("industry", vars_)
-    desired_industry = user_dict['industry']
-    for row in reader:
-        if row["industry"] == desired_industry:
-            con.add_satisfying_tuples(row['TICKER'])
-    return con
+# def add_industry_constraints():
+#     reader = csv.DictReader(fname)
+#     con = Constraint("industry", vars_)
+#     desired_industry = user_dict['industry']
+#     for row in reader:
+#         if row["industry"] == desired_industry:
+#             con.add_satisfying_tuples(row['TICKER'])
+#     return con
 
-# more contraints here
+def industry_constraint(desired_industry):
+    industry_constraints = []
+    for var in vars_:
+        con = Constraint("industry_constraint", [var])
+        sat_tuples = get_satisfying_tickers("INDUSTRY", desired_industry)
 
+        con.add_satisfying_tuples(sat_tuples)
+        industry_constraints.append(con)
+    return industry_constraints
 
 def mutual_funds_csp_model(user_dict):
   '''Returns a CSP object representing a Stocks CSP problem along with an array
@@ -76,7 +86,9 @@ def mutual_funds_csp_model(user_dict):
   generate_vars(volume)
   stocks_csp = CSP('StocksCSP', vars_)
   g_cons = green_constraint()
+  industry_cons = industry_constraint("Weapons")
   [stocks_csp.add_constraint(c) for c in g_cons]
+  [stocks_csp.add_constraint(c) for c in industry_cons]
   # actual csp model here
   return stocks_csp, [vars_]
 
@@ -85,7 +97,7 @@ def print_kenken_soln(var_array):
     for row in var_array:
         print([var.get_assigned_value() for var in row])
 
-def get_satisfying_tickers(field ,acceptable_value, calculated = {}):
+def get_satisfying_tickers(field, acceptable_value, calculated = {}):
     if (field, acceptable_value) not in calculated:
         sat_tuples = []
         with open(fname) as csvfile:
@@ -97,7 +109,7 @@ def get_satisfying_tickers(field ,acceptable_value, calculated = {}):
     return calculated[(field, acceptable_value)]
 
 if __name__ == '__main__':
-    user_dict = {'volume_to_buy': 200, 'green': 1, 'industry': 'Technology',
+    user_dict = {'volume_to_buy': 30, 'green': 1, 'industry': 'Technology',
     'spending_limit': 10000, 'min_stock_price': 25, 'max_stock_price': 500}
     fname = "output.csv" #input("Enter your stocks data file: ")
     vars_ = []
