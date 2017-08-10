@@ -221,27 +221,27 @@ class Constraint:
 
         self.scope = list(scope)
         self.name = name
-        self.sat_tuples = set()
+        self.sat_tuples = dict()
         self.max_spending_limit = None
-        self.max_stock_price = None
-        self.min_stock_price = None
         #The next object data item 'sup_tuples' will be used to help
         #support GAC propgation. It allows access to a list of
         #satisfying tuples that contain a particular variable/value
         #pair.
-        self.sup_tuples = set()
+        self.sup_tuples = dict()
 
     def add_satisfying_tuples(self, tuples):
         '''We specify the constraint by adding its complete list of satisfying tuples.'''
         for x in tuples:
-            self.sat_tuples.add(x)
+            t = tuple(x)  #ensure we have an immutable tuple
+            if not t in self.sat_tuples:
+                self.sat_tuples[t] = True
 
             #now put t in as a support for all of the variable values in it
-        for i, val in enumerate(tuples):
-            var = self.scope[i]
-            if not (var,val) in self.sup_tuples:
-                self.sup_tuples[(var,val)] = []
-            self.sup_tuples[(var,val)].append(t)
+            for i, val in enumerate(t):
+                var = self.scope[i]
+                if not (var,val) in self.sup_tuples:
+                    self.sup_tuples[(var,val)] = []
+                self.sup_tuples[(var,val)].append(t)
 
     def get_scope(self):
         '''get list of variables the constraint is over'''
@@ -256,10 +256,6 @@ class Constraint:
            variables in the constraints scope'''
         if self.name == "max_spending_limit_constraint":
             return sum(val.price for val in vals) < self.max # check total price
-        elif self.name == "max_stock_price_constraint":
-            return max(val.price for val in vals) < self.max_stock_price
-        elif self.name == "min_stock_price_constraint":
-            return min(val.price for val in vals) < self.min_stock_price
 
         return tuple(vals) in self.sat_tuples
 
@@ -270,10 +266,6 @@ class Constraint:
         '''
         if self.name == "max_spending_limit_constraint":
             return val.price < self.max
-        elif self.name == "max_stock_price_constraint":
-            return val.price < self.max_stock_price
-        elif self.name == "min_stock_price_constraint":
-            return val.price < self.min_stock_price
 
         if (var, val) in self.sup_tuples:
             for t in self.sup_tuples[(var, val)]:

@@ -41,9 +41,9 @@ def create_stocks_output(file_name):
 
     reader.next()
     headers = reader.next()
-    headers.append('Region List')
-    headers.append('Green List')
-    headers.append('Industry List')
+    headers.append('Region')
+    headers.append('Green')
+    headers.append('Industry')
     writer.writerow(headers)
 
     row_count = check_row_count(file_name)
@@ -111,13 +111,13 @@ def create_mutual_fund_output(file_name):
   return
 
 if __name__ == '__main__':
-    desired_function = raw_input('Enter your desired process (s to create stocks output, d to parse as dictionary, m to create mutual fund output): ')
+    desired_function = input('Enter your desired process (s to create stocks output, d to parse as dictionary, m to create mutual fund output): ')
 
     options = ["s", "d", "m"]
     while desired_function not in options:
-      desired_function = raw_input("Choose one of [%s]:" % ", ".join(options))
+      desired_function = input("Choose one of [%s]:" % ", ".join(options))
 
-    file_name = raw_input('Enter a file name to process: ')
+    file_name = input('Enter a file name to process: ')
 
     if (desired_function == 's'):
       create_stocks_output(file_name) # create output file with desired additional columns
