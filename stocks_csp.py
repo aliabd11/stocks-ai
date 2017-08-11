@@ -17,23 +17,13 @@ def generate_vars(n):
 
     for row in reader:
         tickers.append(row['TICKER'])
-    #print("tickers: ", tickers)
+    # print("tickers: ", tickers)
     for i in range(n):
         var = Variable("stock_"+str(i), tickers)
         vars_.append(var)
     return vars_
 
-
-def green_constraint():
-    g_cons = []
-    for var in vars_:
-        con = Constraint("green_constraint", [var])
-        #print("con scope: ", con.scope)
-        sat_tuples = get_satisfying_tickers("GREEN", "True")
-        print("sat_tuples: ", sat_tuples)
-        con.add_satisfying_tuples(sat_tuples)
-        g_cons.append(con)
-    return g_cons
+# Spending Constraints
 
 def max_spending_limit_constraint():
     con = Constraint("max_spending_limit", vars_)
@@ -59,14 +49,23 @@ def min_stock_price_constraint():
             con.add_satisfying_tuples(row['TICKER'])
     return con
 
-# def add_industry_constraints():
-#     reader = csv.DictReader(fname)
-#     con = Constraint("industry", vars_)
-#     desired_industry = user_dict['industry']
-#     for row in reader:
-#         if row["industry"] == desired_industry:
-#             con.add_satisfying_tuples(row['TICKER'])
-#     return con
+
+# Green constraints, industry constraints, region constraints
+
+def green_constraint():
+    g_cons = []
+    for var in vars_:
+        con = Constraint("green_constraint", [var])
+        #print("con scope: ", con.scope)
+
+        if(user_dict['green']):
+            sat_tuples = get_satisfying_tickers("GREEN", "True")
+        else:
+            sat_tuples = get_satisfying_tickers("GREEN", "False")
+        #print("sat_tuples: ", sat_tuples)
+        con.add_satisfying_tuples(sat_tuples)
+        g_cons.append(con)
+    return g_cons
 
 def industry_constraint(desired_industry):
     industry_constraints = []
@@ -78,6 +77,18 @@ def industry_constraint(desired_industry):
         industry_constraints.append(con)
     return industry_constraints
 
+def region_constraint(region):
+    region_constraints = []
+    for var in vars_:
+        con = Constraint("industry_constraint", [var])
+        sat_tuples = get_satisfying_tickers("REGION", region)
+
+        con.add_satisfying_tuples(sat_tuples)
+        region_constraints.append(con)
+    return region_constraints
+
+# Generate the actual mutual funds model
+
 def mutual_funds_csp_model(user_dict):
   '''Returns a CSP object representing a Stocks CSP problem along with an array
   of variables for the problem.
@@ -85,13 +96,16 @@ def mutual_funds_csp_model(user_dict):
   volume = user_dict['volume_to_buy']
   generate_vars(volume)
   stocks_csp = CSP('StocksCSP', vars_)
+
   g_cons = green_constraint()
-  industry_cons = industry_constraint("Weapons")
+  industry_cons = industry_constraint(user_dict['industry'])
+  region_cons = region_constraint(user_dict['region'])
+
   [stocks_csp.add_constraint(c) for c in g_cons]
   [stocks_csp.add_constraint(c) for c in industry_cons]
-  # actual csp model here
-  return stocks_csp, [vars_]
+  [stocks_csp.add_constraint(c) for c in region_cons]
 
+  return stocks_csp, [vars_]
 
 def print_kenken_soln(var_array):
     for row in var_array:
@@ -108,9 +122,11 @@ def get_satisfying_tickers(field, acceptable_value, calculated = {}):
         calculated[(field, acceptable_value)] = sat_tuples
     return calculated[(field, acceptable_value)]
 
+#def n_ary_constraint()
+
 if __name__ == '__main__':
-    user_dict = {'volume_to_buy': 30, 'green': 1, 'industry': 'Technology',
-    'spending_limit': 10000, 'min_stock_price': 25, 'max_stock_price': 500}
+    user_dict = {'volume_to_buy': 30, 'green': 0, 'industry': 'Technology',
+    'spending_limit': 1, 'min_stock_price': 25, 'max_stock_price': 500,'region': 'Canada'}
     fname = "output.csv" #input("Enter your stocks data file: ")
     vars_ = []
 

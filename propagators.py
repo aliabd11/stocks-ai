@@ -80,25 +80,25 @@ def prop_FC(csp, newVar=None):
 	only one uninstantiated variable. Remember to keep
 	track of all pruned variable,value pairs and return '''
 
-  if not newVar:
-      constraints = csp.get_all_cons()
-  else:
-      constraints = csp.get_cons_with_var(newVar)
+	if not newVar:
+	    constraints = csp.get_all_cons()
+	else:
+	    constraints = csp.get_cons_with_var(newVar)
 
-  pruned = []
+	pruned = []
 
-  for con in constraints:
-      if con.get_n_unasgn() == 1:
-          # forward check all constraints with V that have one unassigned variable left
-          scope_vars = con.get_scope()
-          for var in scope_vars:
-              for val in var.cur_domain():
-                  if not con.has_support(var, val):
-                      pruned.append((var, val))
-                      var.prune_value(val)  # remove from CurDom
-              if var.cur_domain_size() == 0:
-                  return False, pruned  # Domain Wipe Out
-  return True, pruned
+	for con in constraints:
+	    if con.get_n_unasgn() == 1:
+	        # forward check all constraints with V that have one unassigned variable left
+	        scope_vars = con.get_scope()
+	        for var in scope_vars:
+	            for val in var.cur_domain():
+	                if not con.has_support(var, val):
+	                    pruned.append((var, val))
+	                    var.prune_value(val)  # remove from CurDom
+	            if var.cur_domain_size() == 0:
+	                return False, pruned  # Domain Wipe Out
+	return True, pruned
 
 def prop_GAC(csp, newVar=None):
 	'''Do GAC propagation. If newVar is None we do initial GAC enforce

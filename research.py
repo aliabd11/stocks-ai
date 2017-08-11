@@ -71,6 +71,7 @@ def parse_as_dictionary(file_name):
       key = row[0]
       result[key] = row[1:]
   print(result)
+  print(result['MIND'][15])
 
 def generate_styles(rows):
   #mutual funds style box #http://www.investopedia.com/articles/basics/06/stylebox.asp
