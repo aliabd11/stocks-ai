@@ -1,6 +1,8 @@
 import csv
 from cspbase import *
 from propagators import *
+import _thread
+import time
 '''
 Construct and return Mutual Funds CSP model.
 '''
@@ -141,22 +143,36 @@ def get_all_diff_constraints():
         for j in range(i+1, len(vars_)):
             var1 = vars_[i]
             var2 = vars_[j]
-            name = var1.name + var2.name
+            name = "alldiff"
             scope = [var1, var2]
             con = Constraint(name, scope)
-            con.add_satisfying_tuples(sat_tuples)
             cons.append(con)
     return cons
+
+
+def print_time(delay):
+    count = 0
+    start = time.time()
+    while not main_thread_not_done:
+        time.sleep(delay)
+        current = time.time()
+        print("Working on solution, Time Elapsed: %d" % int(current - start) )
+    new_thread_ended = True
+
 
 if __name__ == '__main__':
     user_dict = {'volume_to_buy': 30, 'green': 0, 'industry': 'Technology',
     'spending_limit': 1, 'min_stock_price': 25, 'max_stock_price': 500,'region': 'Canada'}
     fname = "output.csv" #input("Enter your stocks data file: ")
     vars_ = []
-
+    main_thread_not_done = False
     print("Finding solution based on your input!")
+    _thread.start_new_thread( print_time, (5,) )
     csp, var_array = mutual_funds_csp_model(user_dict)
     solver = BT(csp)
     solver.bt_search(prop_GAC)
-    print("Solution")
-    print_kenken_soln(var_array)
+    main_thread_not_done = True
+    new_thread_ended = False
+    if new_thread_ended:
+        print("Solution")
+        print_kenken_soln(var_array)

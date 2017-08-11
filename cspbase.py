@@ -231,17 +231,20 @@ class Constraint:
 
     def add_satisfying_tuples(self, tuples):
         '''We specify the constraint by adding its complete list of satisfying tuples.'''
-        for x in tuples:
-            t = tuple(x)  #ensure we have an immutable tuple
-            if not t in self.sat_tuples:
-                self.sat_tuples[t] = True
+        if (self.name == "alldiff"):
+            pass
+        else:
+            for x in tuples:
+                t = tuple(x)  #ensure we have an immutable tuple
+                if not t in self.sat_tuples:
+                    self.sat_tuples[t] = True
 
-            #now put t in as a support for all of the variable values in it
-            for i, val in enumerate(t):
-                var = self.scope[i]
-                if not (var,val) in self.sup_tuples:
-                    self.sup_tuples[(var,val)] = []
-                self.sup_tuples[(var,val)].append(t)
+                #now put t in as a support for all of the variable values in it
+                for i, val in enumerate(t):
+                    var = self.scope[i]
+                    if not (var,val) in self.sup_tuples:
+                        self.sup_tuples[(var,val)] = []
+                    self.sup_tuples[(var,val)].append(t)
 
     def get_scope(self):
         '''get list of variables the constraint is over'''
@@ -254,6 +257,9 @@ class Constraint:
            constraints "satisfies" function.  Note the list of values
            are must be ordered in the same order as the list of
            variables in the constraints scope'''
+
+        if self.name == "alldiff":
+            return var1.get_assigned_value() != var2.get_assigned_value()
         return tuple(vals) in self.sat_tuples
 
     def get_n_unasgn(self):
@@ -278,6 +284,10 @@ class Constraint:
            of assignments satisfying the constraint where each value is
            still in the corresponding variables current domain
         '''
+        if self.name == "alldiff":
+            var1  = self.scope[0]
+            var2  = self.scope[1]
+            return (not (var1.is_assigned() and var2.is_assigned()))  or (var1.get_assigned_value() != var2.get_assigned_value())
         if (var, val) in self.sup_tuples:
             for t in self.sup_tuples[(var, val)]:
                 if self.tuple_is_valid(t):
