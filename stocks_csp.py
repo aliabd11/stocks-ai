@@ -10,13 +10,16 @@ Construct and return Mutual Funds CSP model.
 # csp_data {'TICKER': {'price': int, 'price_open': float, 'price_close': float},
 #  'max_spending_limit': int, 'max_stock_price', int, 'min_stock_price': int, 'green_stocks': set(), 'tech_stocks', set()}
 
-
-def generate_vars(n):
+def get_all_tickers():
     tickers = []
     reader = csv.DictReader(open(fname))
 
     for row in reader:
         tickers.append(row['TICKER'])
+    return tickers
+
+def generate_vars(n):
+    tickers = get_all_tickers()
     # print("tickers: ", tickers)
     for i in range(n):
         var = Variable("stock_"+str(i), tickers)
@@ -100,10 +103,13 @@ def mutual_funds_csp_model(user_dict):
   g_cons = green_constraint()
   industry_cons = industry_constraint(user_dict['industry'])
   region_cons = region_constraint(user_dict['region'])
+  all_diff_cons = get_all_diff_constraints()
 
   [stocks_csp.add_constraint(c) for c in g_cons]
   [stocks_csp.add_constraint(c) for c in industry_cons]
   [stocks_csp.add_constraint(c) for c in region_cons]
+  [stocks_csp.add_constraint(c) for c in all_diff_cons]
+
 
   return stocks_csp, [vars_]
 
@@ -123,6 +129,24 @@ def get_satisfying_tickers(field, acceptable_value, calculated = {}):
     return calculated[(field, acceptable_value)]
 
 #n-ary constraint
+
+def get_all_diff_constraints():
+    cons = []
+    tickers = get_all_tickers()
+    sat_tuples = []
+    for x in range(len(tickers)):
+        for y in range(i+1, len(tickers)):
+            sat_tuples.append((tickers[x], tickers[y]),)
+    for i in range(len(vars_)):
+        for j in range(i+1, len(vars_)):
+            var1 = vars_[i]
+            var2 = vars_[j]
+            name = var.name + var2.name
+            scope = [var, var2]
+            con = Constraint(name, scope)
+            con.add_satisfying_tuples(sat_tuples)
+            cons.append(con)
+    return cons
 
 if __name__ == '__main__':
     user_dict = {'volume_to_buy': 30, 'green': 0, 'industry': 'Technology',
