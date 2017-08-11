@@ -170,7 +170,7 @@ if __name__ == '__main__':
     _thread.start_new_thread( print_time, (5,) )
     csp, var_array = mutual_funds_csp_model(user_dict)
     solver = BT(csp)
-    solver.bt_search(prop_GAC)
+    solver.bt_search(prop_BT)
     main_thread_not_done = True
     new_thread_ended = False
     if new_thread_ended:

@@ -259,7 +259,7 @@ class Constraint:
            variables in the constraints scope'''
 
         if self.name == "alldiff":
-            return var1.get_assigned_value() != var2.get_assigned_value()
+            return vals[0] != vals[1]
         return tuple(vals) in self.sat_tuples
 
     def get_n_unasgn(self):
