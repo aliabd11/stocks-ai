@@ -122,8 +122,52 @@ def get_satisfying_tickers(field, acceptable_value, calculated = {}):
         calculated[(field, acceptable_value)] = sat_tuples
     return calculated[(field, acceptable_value)]
 
-#def n_ary_constraint()
+#n-ary constraint
 
+def append_all_diff_cons(stocks_csp, n, var_matrix):
+    '''
+    This function appends binary not-equal constraints'''
+    # add rows
+    row_num = 0
+    for row in var_matrix:
+        row_num+=1
+        for x in range(n-1):
+            for x2 in range(x+1, n):
+                scope = []
+                name = x
+                sat_tuples = []
+                scope.append(row[x])
+                scope.append(row[x2])
+                for i in range(1,n+1):
+                    for j in range(1,n+1):
+                        if i != j:
+                            sat_tuples.append((i,j),)
+                cons = Constraint(name, scope)
+                cons.add_satisfying_tuples(sat_tuples)
+                stocks_csp.add_constraint(cons)
+
+    copy = list(var_matrix) # preserve original list
+    rotated_matrix = zip(*copy[::-1])  # stackoverflow answer to rotate matrix
+
+    # add columns
+    col_num = 0
+    for column in rotated_matrix:
+        col_num += 1
+        for x in range(n-1):
+            for x2 in range(x+1, n):
+                scope = []
+                name = x
+                scope.append(column[x])
+                scope.append(column[x2])
+                sat_tuples = []
+                for i in range(1,n+1):
+                    for j in range(1,n+1):
+                        if i!=j:
+                            sat_tuples.append((i,j),)
+                cons = Constraint(name, scope)
+                cons.add_satisfying_tuples(sat_tuples)
+                stocks_csp.add_constraint(cons)
+                
 if __name__ == '__main__':
     user_dict = {'volume_to_buy': 30, 'green': 0, 'industry': 'Technology',
     'spending_limit': 1, 'min_stock_price': 25, 'max_stock_price': 500,'region': 'Canada'}
