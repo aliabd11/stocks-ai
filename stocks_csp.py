@@ -135,14 +135,14 @@ def get_all_diff_constraints():
     tickers = get_all_tickers()
     sat_tuples = []
     for x in range(len(tickers)):
-        for y in range(i+1, len(tickers)):
+        for y in range(x+1, len(tickers)):
             sat_tuples.append((tickers[x], tickers[y]),)
     for i in range(len(vars_)):
         for j in range(i+1, len(vars_)):
             var1 = vars_[i]
             var2 = vars_[j]
-            name = var.name + var2.name
-            scope = [var, var2]
+            name = var1.name + var2.name
+            scope = [var1, var2]
             con = Constraint(name, scope)
             con.add_satisfying_tuples(sat_tuples)
             cons.append(con)
@@ -154,6 +154,7 @@ if __name__ == '__main__':
     fname = "output.csv" #input("Enter your stocks data file: ")
     vars_ = []
 
+    print("Finding solution based on your input!")
     csp, var_array = mutual_funds_csp_model(user_dict)
     solver = BT(csp)
     solver.bt_search(prop_GAC)
