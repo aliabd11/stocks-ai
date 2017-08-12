@@ -222,6 +222,8 @@ class Constraint:
         self.scope = list(scope)
         self.name = name
         self.sat_tuples = dict()
+        self.min_stock_price = 0
+        self.max_stock_price = 0
 
         #The next object data item 'sup_tuples' will be used to help
         #support GAC propgation. It allows access to a list of
@@ -231,20 +233,18 @@ class Constraint:
 
     def add_satisfying_tuples(self, tuples):
         '''We specify the constraint by adding its complete list of satisfying tuples.'''
-        if (self.name == "alldiff"):
-            pass
-        else:
-            for x in tuples:
-                t = tuple(x)  #ensure we have an immutable tuple
-                if not t in self.sat_tuples:
-                    self.sat_tuples[t] = True
 
-                #now put t in as a support for all of the variable values in it
-                for i, val in enumerate(t):
-                    var = self.scope[i]
-                    if not (var,val) in self.sup_tuples:
-                        self.sup_tuples[(var,val)] = []
-                    self.sup_tuples[(var,val)].append(t)
+        for x in tuples:
+            t = tuple(x)  #ensure we have an immutable tuple
+            if not t in self.sat_tuples:
+                self.sat_tuples[t] = True
+
+            #now put t in as a support for all of the variable values in it
+            for i, val in enumerate(t):
+                var = self.scope[i]
+                if not (var,val) in self.sup_tuples:
+                    self.sup_tuples[(var,val)] = []
+                self.sup_tuples[(var,val)].append(t)
 
     def get_scope(self):
         '''get list of variables the constraint is over'''
@@ -260,6 +260,10 @@ class Constraint:
 
         if self.name == "alldiff":
             return vals[0] != vals[1]
+        if self.name == "min_stock_price":
+            return prices_dict[vals[0]] > self.min_stock_price
+        if self.name == "max_stock_price":
+            return prices_dict[vals[0]] < self.max_stock_price
         return tuple(vals) in self.sat_tuples
 
     def get_n_unasgn(self):
@@ -288,6 +292,11 @@ class Constraint:
             var1  = self.scope[0]
             var2  = self.scope[1]
             return (not (var1.is_assigned() and var2.is_assigned()))  or (var1.get_assigned_value() != var2.get_assigned_value())
+        if self.name == "min_stock_price":
+            return prices_dict[val] > self.min_stock_price
+        if self.name == "max_stock_price":
+            print("litty")
+            return prices_dict[val] < self.max_stock_price
         if (var, val) in self.sup_tuples:
             for t in self.sup_tuples[(var, val)]:
                 if self.tuple_is_valid(t):
@@ -557,3 +566,12 @@ class BT:
 
             self.restoreUnasgnVar(var)
             return False
+import csv
+def prices():
+    reader = csv.DictReader(open("output.csv"))
+    prices = {}
+    for row in reader:
+        prices[row['TICKER']] = float(row['CLOSE'])
+    return prices
+# print(prices())
+prices_dict = prices()
