@@ -31,29 +31,89 @@ def generate_vars(n):
 # Spending Constraints
 
 def max_spending_limit_constraint():
-    con = Constraint("max_spending_limit", vars_)
-    max_ = user_dict['max_spending_limit']
-    con.add_satisfying_tuples(((max_,),)) # this checked by a formula
-    return con
+    spend_limit = user_dict['max_spending_limit']
+
+    cons = []
+    tickers = get_all_tickers()
+    sat_tuples = []
+    for x in range(len(tickers)):
+        for y in range(x+1, len(tickers)):
+            # INCOMPLETE
+            if (tickers[x] < int(spend_limit) or tickers[y] < int(spend_limit)):
+                sat_tuples.append((tickers[x], tickers[y]),)
+    for i in range(len(vars_)):
+        for j in range(i+1, len(vars_)):
+            var1 = vars_[i]
+            var2 = vars_[j]
+            name = "alldiff"
+            scope = [var1, var2]
+            con = Constraint(name, scope)
+            cons.append(con)
+    return cons
+
+    # con = Constraint("max_spending_limit", vars_)
+    # max_ = user_dict['max_spending_limit']
+    # con.add_satisfying_tuples(((max_,),)) # this checked by a formula
+    # return con
 
 def max_stock_price_constraint():
-    con = Constraint("max_stock_price_constraint", vars_)
-    reader = csv.DictReader(fname)
-    max_ = user_dict['max_stock_price']
-    for row in reader:
-        if row["CLOSE"] < max_:
-            con.add_satisfying_tuples(row['TICKER'])
-    return con
+    # con = Constraint("max_stock_price_constraint", vars_)
+    # reader = csv.DictReader(fname)
+    # max_ = user_dict['max_stock_price']
+    # for row in reader:
+    #     if row["CLOSE"] < max_:
+    #         con.add_satisfying_tuples(row['TICKER'])
+    # return con
+
+    max_price = user_dict['max_stock_price_constraint']
+
+    cons = []
+    tickers = get_all_tickers()
+    sat_tuples = []
+    for x in range(len(tickers)):
+        for y in range(x+1, len(tickers)):
+            # INCOMPLETE
+            if (tickers[x] < int(spend_limit) or tickers[y] < int(spend_limit)):
+                sat_tuples.append((tickers[x], tickers[y]),)
+    for i in range(len(vars_)):
+        for j in range(i+1, len(vars_)):
+            var1 = vars_[i]
+            var2 = vars_[j]
+            name = "alldiff"
+            scope = [var1, var2]
+            con = Constraint(name, scope)
+            cons.append(con)
+    return cons
+
 
 def min_stock_price_constraint():
-    con = Constraint("min_stock_price_constraint", vars_)
-    reader = csv.DictReader(fname)
-    min_ = user_dict['min_stock_price']
-    for row in reader:
-        if row["CLOSE"] > min_:
-            con.add_satisfying_tuples(row['TICKER'])
-    return con
+    # con = Constraint("min_stock_price_constraint", vars_)
+    # reader = csv.DictReader(fname)
+    # min_ = user_dict['min_stock_price']
+    # for row in reader:
+    #     if row["CLOSE"] > min_:
+    #         con.add_satisfying_tuples(row['TICKER'])
+    # return con
 
+    min_price = user_dict['min_stock_price_constraint']
+
+    cons = []
+    tickers = get_all_tickers()
+    sat_tuples = []
+    for x in range(len(tickers)):
+        for y in range(x+1, len(tickers)):
+            # INCOMPLETE
+            if (tickers[x] < int(spend_limit) or tickers[y] < int(spend_limit)):
+                sat_tuples.append((tickers[x], tickers[y]),)
+    for i in range(len(vars_)):
+        for j in range(i+1, len(vars_)):
+            var1 = vars_[i]
+            var2 = vars_[j]
+            name = "alldiff"
+            scope = [var1, var2]
+            con = Constraint(name, scope)
+            cons.append(con)
+    return cons
 
 # Green constraints, industry constraints, region constraints
 
@@ -106,12 +166,17 @@ def mutual_funds_csp_model(user_dict):
   industry_cons = industry_constraint(user_dict['industry'])
   region_cons = region_constraint(user_dict['region'])
   all_diff_cons = get_all_diff_constraints()
+  #min_stock_price_cons = min_stock_price_constraint()
+  #max_stock_price_cons = max_stock_price_constraint()
+  #spending_cons =  max_spending_limit_constraint()
 
   [stocks_csp.add_constraint(c) for c in g_cons]
   [stocks_csp.add_constraint(c) for c in industry_cons]
   [stocks_csp.add_constraint(c) for c in region_cons]
   [stocks_csp.add_constraint(c) for c in all_diff_cons]
-
+  #[stocks_csp.add_constraint(c) for c in spending_cons]
+  #[stocks_csp.add_constraint(c) for c in spending_cons]
+  #[stocks_csp.add_constraint(c) for c in spending_cons]
 
   return stocks_csp, [vars_]
 
