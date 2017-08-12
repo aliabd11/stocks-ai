@@ -4,6 +4,7 @@ from cspbase import *
 from propagators import *
 import _thread
 import time
+import sys
 '''
 Construct and return Mutual Funds CSP model.
 '''
@@ -54,48 +55,24 @@ def max_spending_limit_constraint():
     return cons
 
 def max_stock_price_constraint():
-    max_user_price = user_dict['max_stock_price']
-    stock_dictionary = parse_as_dictionary('output.csv')
-
     cons = []
-    tickers = get_all_tickers()
-    sat_tuples = []
-    for x in range(len(tickers)):
-        for y in range(x+1, len(tickers)):
-            price_x = float(stock_dictionary[tickers[x]][6]) #VOLUME column
-            price_y = float(stock_dictionary[tickers[y]][6])
-            if (price_x < float(max_user_price) and price_y < float(max_user_price)):
-                sat_tuples.append((tickers[x], tickers[y]),)
+    max_stock_price = float(user_dict['max_stock_price'])
     for i in range(len(vars_)):
-        for j in range(i+1, len(vars_)):
-            var1 = vars_[i]
-            var2 = vars_[j]
-            name = "alldiff"
-            scope = [var1, var2]
+            name = "max_stock_price"
+            scope = [vars_[i]]
             con = Constraint(name, scope)
+            con.max_stock_price = max_stock_price
             cons.append(con)
     return cons
 
 def min_stock_price_constraint():
-    min_user_price = user_dict['min_stock_price']
-    stock_dictionary = parse_as_dictionary('output.csv')
-
     cons = []
-    tickers = get_all_tickers()
-    sat_tuples = []
-    for x in range(len(tickers)):
-        for y in range(x+1, len(tickers)):
-            price_x = float(stock_dictionary[tickers[x]][6])
-            price_y = float(stock_dictionary[tickers[y]][6])
-            if (price_x > float(min_user_price) and price_y > float(min_user_price)):
-                sat_tuples.append((tickers[x], tickers[y]),)
+    min_stock_price = float(user_dict['min_stock_price'])
     for i in range(len(vars_)):
-        for j in range(i+1, len(vars_)):
-            var1 = vars_[i]
-            var2 = vars_[j]
-            name = "alldiff"
-            scope = [var1, var2]
+            name = "min_stock_price"
+            scope = [vars_[i]]
             con = Constraint(name, scope)
+            con.min_stock_price = min_stock_price
             cons.append(con)
     return cons
 
@@ -146,12 +123,19 @@ def mutual_funds_csp_model(user_dict):
   generate_vars(int(volume))
   stocks_csp = CSP('StocksCSP', vars_)
 
+  print("\bAdding green constraints")
   g_cons = green_constraint()
+  print("\bAdding industry constraints")
   industry_cons = industry_constraint(user_dict['industry'])
+  print("\bAdding region constraints")
   region_cons = region_constraint(user_dict['region'])
+  print("\bAdding binary not equal constraints")
   all_diff_cons = get_all_diff_constraints()
+  print("\bAdding min stock price constraints")
   min_stock_price_cons = min_stock_price_constraint()
+  print("\bAdding max stock price constraints")
   max_stock_price_cons = max_stock_price_constraint()
+  print("\bAdding spending constraints")
   spending_cons =  max_spending_limit_constraint()
 
   [stocks_csp.add_constraint(c) for c in g_cons]
@@ -198,15 +182,20 @@ def get_all_diff_constraints():
             cons.append(con)
     return cons
 
-
-def print_time(delay):
-    count = 0
+def spinning_cursor():
+    while True:
+        for cursor in u'|/-\\':
+            yield cursor
+def print_loading():
+    spinner = spinning_cursor()
     start = time.time()
-    while not main_thread_not_done:
-        time.sleep(delay)
-        current = time.time()
-        print("Working on solution, Time Elapsed: %d" % int(current - start) )
+    while not main_thread_done or (time.time() - start < 2):
+        sys.stdout.write(next(spinner))
+        sys.stdout.flush()
+        time.sleep(0.1)
+        sys.stdout.write('\b')
     new_thread_ended = True
+
 
 
 if __name__ == '__main__':
@@ -218,6 +207,7 @@ if __name__ == '__main__':
 
     for user in user_data:
         print("Finding portfolio for User: {0}".format(user['name']))
+
         user_dict = user
 
         #user_dict = {'volume_to_buy': 30, 'green': 0, 'industry': 'Technology',
@@ -225,12 +215,14 @@ if __name__ == '__main__':
 
         fname = "output.csv" #input("Enter your stocks data file: ")
         vars_ = []
-        main_thread_not_done = False
-        _thread.start_new_thread( print_time, (5,) )
+        main_thread_done = False
+        _thread.start_new_thread( print_loading, tuple() )
+        print("Building CSP model")
         csp, var_array = mutual_funds_csp_model(user_dict)
         solver = BT(csp)
+        print("Performing search")
         solver.bt_search(prop_BT)
-        main_thread_not_done = True
+        main_thread_done = True
         new_thread_ended = False
         if new_thread_ended:
             print("Solution")
