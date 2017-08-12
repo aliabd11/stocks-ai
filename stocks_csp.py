@@ -63,7 +63,7 @@ def green_constraint():
         con = Constraint("green_constraint", [var])
         #print("con scope: ", con.scope)
 
-        if(user_dict['green']):
+        if(int(user_dict['green'])):
             sat_tuples = get_satisfying_tickers("GREEN", "True")
         else:
             sat_tuples = get_satisfying_tickers("GREEN", "False")
@@ -99,7 +99,7 @@ def mutual_funds_csp_model(user_dict):
   of variables for the problem.
   '''
   volume = user_dict['volume_to_buy']
-  generate_vars(volume)
+  generate_vars(int(volume))
   stocks_csp = CSP('StocksCSP', vars_)
 
   g_cons = green_constraint()
@@ -161,18 +161,28 @@ def print_time(delay):
 
 
 if __name__ == '__main__':
-    user_dict = {'volume_to_buy': 30, 'green': 0, 'industry': 'Technology',
-    'spending_limit': 1, 'min_stock_price': 25, 'max_stock_price': 500,'region': 'Canada'}
-    fname = "output.csv" #input("Enter your stocks data file: ")
-    vars_ = []
-    main_thread_not_done = False
-    print("Finding solution based on your input!")
-    _thread.start_new_thread( print_time, (5,) )
-    csp, var_array = mutual_funds_csp_model(user_dict)
-    solver = BT(csp)
-    solver.bt_search(prop_BT)
-    main_thread_not_done = True
-    new_thread_ended = False
-    if new_thread_ended:
-        print("Solution")
-        print_kenken_soln(var_array)
+    input_file = csv.DictReader(open("user_data.csv"))
+
+    user_data = []
+    for row in input_file:
+        user_data.append(row)
+
+    for user in user_data:
+        print("Finding portfolio for User: {0}".format(user['name']))
+        user_dict = user
+
+        #user_dict = {'volume_to_buy': 30, 'green': 0, 'industry': 'Technology',
+        #'spending_limit': 1, 'min_stock_price': 25, 'max_stock_price': 500,'region': 'Canada'}
+
+        fname = "output.csv" #input("Enter your stocks data file: ")
+        vars_ = []
+        main_thread_not_done = False
+        _thread.start_new_thread( print_time, (5,) )
+        csp, var_array = mutual_funds_csp_model(user_dict)
+        solver = BT(csp)
+        solver.bt_search(prop_BT)
+        main_thread_not_done = True
+        new_thread_ended = False
+        if new_thread_ended:
+            print("Solution")
+            print_kenken_soln(var_array)
