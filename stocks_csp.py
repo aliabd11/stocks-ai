@@ -135,8 +135,6 @@ def mutual_funds_csp_model(user_dict):
   min_stock_price_cons = min_stock_price_constraint()
   print("\bAdding max stock price constraints")
   max_stock_price_cons = max_stock_price_constraint()
-  print("\bAdding spending constraints")
-  spending_cons =  max_spending_limit_constraint()
 
   [stocks_csp.add_constraint(c) for c in g_cons]
   [stocks_csp.add_constraint(c) for c in industry_cons]
@@ -144,7 +142,6 @@ def mutual_funds_csp_model(user_dict):
   [stocks_csp.add_constraint(c) for c in all_diff_cons]
   [stocks_csp.add_constraint(c) for c in max_stock_price_cons]
   [stocks_csp.add_constraint(c) for c in min_stock_price_cons]
-  [stocks_csp.add_constraint(c) for c in spending_cons]
 
   return stocks_csp, [vars_]
 
@@ -189,22 +186,32 @@ def spinning_cursor():
 def print_loading():
     spinner = spinning_cursor()
     start = time.time()
-    while not main_thread_done or (time.time() - start < 2):
+    while not main_thread_done:
         sys.stdout.write(next(spinner))
         sys.stdout.flush()
         time.sleep(0.1)
         sys.stdout.write('\b')
-    new_thread_ended = True
 
 
 
 if __name__ == '__main__':
-    input_file = csv.DictReader(open("user_data.csv"))
 
+    # get input files
+    user_data_file = input("Enter file name containing user data to satisfy (leave blank for user_data.csv): ")
+    if not user_data_file:
+        user_data_file = "user_data.csv"
+    fname = input("Enter your stocks data file (leave blank for output.csv): ")
+    if not fname:
+        fname = "output.csv"
+
+    # process input
+    input_file = csv.DictReader(open(user_data_file))
     user_data = []
     for row in input_file:
         user_data.append(row)
 
+    # start satisfying constraints
+    user_index = 0
     for user in user_data:
         print("Finding portfolio for User: {0}".format(user['name']))
 
@@ -213,9 +220,10 @@ if __name__ == '__main__':
         #user_dict = {'volume_to_buy': 30, 'green': 0, 'industry': 'Technology',
         #'spending_limit': 1, 'min_stock_price': 25, 'max_stock_price': 500,'region': 'Canada'}
 
-        fname = "output.csv" #input("Enter your stocks data file: ")
+
         vars_ = []
         main_thread_done = False
+        new_thread_ended = False
         _thread.start_new_thread( print_loading, tuple() )
         print("Building CSP model")
         csp, var_array = mutual_funds_csp_model(user_dict)
@@ -223,7 +231,7 @@ if __name__ == '__main__':
         print("Performing search")
         solver.bt_search(prop_BT)
         main_thread_done = True
-        new_thread_ended = False
-        if new_thread_ended:
-            print("Solution")
-            print_kenken_soln(var_array)
+        print("Solution")
+        print("The following constraints were satisfied: ")
+        print(user_data[user_index])
+        print_kenken_soln(var_array)
