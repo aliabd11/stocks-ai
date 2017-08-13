@@ -295,7 +295,6 @@ class Constraint:
         if self.name == "min_stock_price":
             return prices_dict[val] > self.min_stock_price
         if self.name == "max_stock_price":
-            print("litty")
             return prices_dict[val] < self.max_stock_price
         if (var, val) in self.sup_tuples:
             for t in self.sup_tuples[(var, val)]:

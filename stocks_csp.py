@@ -183,6 +183,7 @@ def spinning_cursor():
     while True:
         for cursor in u'|/-\\':
             yield cursor
+
 def print_loading():
     spinner = spinning_cursor()
     start = time.time()
@@ -220,7 +221,6 @@ if __name__ == '__main__':
         #user_dict = {'volume_to_buy': 30, 'green': 0, 'industry': 'Technology',
         #'spending_limit': 1, 'min_stock_price': 25, 'max_stock_price': 500,'region': 'Canada'}
 
-
         vars_ = []
         main_thread_done = False
         new_thread_ended = False
@@ -231,7 +231,9 @@ if __name__ == '__main__':
         print("Performing search")
         solver.bt_search(prop_BT)
         main_thread_done = True
-        print("Solution")
+        print("Solution:")
         print("The following constraints were satisfied: ")
-        print(user_data[user_index])
+        #print(user_data[user_index])
+        print(", ".join([" = ".join([key, str(val)]) for key, val in user_data[user_index].items()]))
+
         print_kenken_soln(var_array)
