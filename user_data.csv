@@ -1,10 +1,6 @@
 name,volume_to_buy,green,industry,spending_limit,min_stock_price,max_stock_price,region
-Bobby,30,0,Technology,50000,20,500,Canada
-Tommy,50,0,Weapons,40000,25,500,Mexico
-Ammar,70,0,Automotive,40000,25,500,Canada
-Abdullas,20,0,Health,40000,25,500,Canada
-Obama,43,0,Drugs,40000,25,500,Mexico
-Trump,44,0,Weapons,40000,25,500,Canada
-Bush,35,0,Alcohol,40000,25,500,United States
-Reagan,38,0,Tobacco,40000,25,500,United States
-Trudeau,100,0,Technology,40000,25,500,Canada
+Gilfoyle,30,0,Technology,50000,20,500,Canada
+Jin-Yiang,50,0,Weapons,40000,25,500,Mexico
+Erlich,15,0,Technology,40000,25,600,United States
+Richard,20,0,Health,40000,25,500,United States
+Obama,23,0,Drugs,40000,25,500,Mexico

@@ -226,13 +226,23 @@ if __name__ == '__main__':
         main_thread_done = False
         new_thread_ended = False
         _thread.start_new_thread( print_loading, tuple() )
+
         print("Building CSP model")
         csp, var_array = mutual_funds_csp_model(user_dict)
         solver = BT(csp)
-        print("Performing search")
+        print("Performing BT search")
         solver.bt_search(prop_BT)
-        #solver.bt_search(prop_FC, ord_mrv)
+
+        print("Performing FC search with ord_mrv")
+        solver.bt_search(prop_FC, ord_mrv)
+
+        print("Performing FC search without ord_mrv")
+        solver.bt_search(prop_FC)
+
+        #print("Performing GAC search")
+        #Too slow to be useful
         #solver.bt_search(prop_GAC, ord_mrv)
+
         main_thread_done = True
         print("Solution:")
         print("The following constraints were satisfied: ")
