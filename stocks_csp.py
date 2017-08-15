@@ -2,6 +2,7 @@ import csv
 from research import *
 from cspbase import *
 from propagators import *
+from orderings import *
 import _thread
 import time
 import sys
@@ -230,6 +231,8 @@ if __name__ == '__main__':
         solver = BT(csp)
         print("Performing search")
         solver.bt_search(prop_BT)
+        #solver.bt_search(prop_FC, ord_mrv)
+        #solver.bt_search(prop_GAC, ord_mrv)
         main_thread_done = True
         print("Solution:")
         print("The following constraints were satisfied: ")

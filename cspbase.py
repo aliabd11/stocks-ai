@@ -264,7 +264,8 @@ class Constraint:
             return prices_dict[vals[0]] > self.min_stock_price
         if self.name == "max_stock_price":
             return prices_dict[vals[0]] < self.max_stock_price
-        return tuple(vals) in self.sat_tuples
+        else:
+          return tuple(vals) in self.sat_tuples
 
     def get_n_unasgn(self):
         '''return the number of unassigned variables in the constraint's scope'''
@@ -296,7 +297,7 @@ class Constraint:
             return prices_dict[val] > self.min_stock_price
         if self.name == "max_stock_price":
             return prices_dict[val] < self.max_stock_price
-        if (var, val) in self.sup_tuples:
+        elif (var, val) in self.sup_tuples:
             for t in self.sup_tuples[(var, val)]:
                 if self.tuple_is_valid(t):
                     return True
