@@ -8,6 +8,15 @@ Stocks + Artificial Intelligence
 You will need two input files: a csv containing stocks data, a csv containing customers and their desired constraints
 There are two programs: research.py, stocks_csp.py
 
+
+Follow Step 0) if you would like to test run the program before generating your own data. 
+Step 0) run
+
+        $ python3 stocks_csp.py
+ 
+A stocks data file (quotes.csv) and user constraints files (user_data.csv) are provided by default. Simply run the command above, hit enter twice, and a list of portfolios will be printed on your screen. Also feel free to change the input, and watch its rammifications.
+
+
 Step 1) run
 
         $ python3 research.py
